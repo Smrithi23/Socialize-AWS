@@ -1,0 +1,15 @@
+.login-image-container {
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    background-image: url('../../campus.jpeg'); 
+    image-rendering: crisp-edges;
+    image-rendering: auto;
+    background-size: cover; 
+    background-position: center;
+    opacity: 1;
+  }
+
+.logo{
+  height: 20vh;
+}
