@@ -2,10 +2,12 @@ import json
 import boto3
 
 def lambda_handler(event, context):
-    
-    payload = json.loads(event['body'])
-    uni = payload['uni']
-    updated_data = payload['updatedData']
+    uni = event['uni']
+    updated_data = {
+        "location" : event['location'],
+        "phoneno" : event['phoneno'],
+        "interest": event['interest']
+    }
 
     dynamodb = boto3.resource('dynamodb')
 

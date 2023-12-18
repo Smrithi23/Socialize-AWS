@@ -5,6 +5,7 @@ function Logout() {
     localStorage.removeItem("uni");
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("name");
+    localStorage.removeItem("interest");
     window.location.href = "/";
   };
   handleLogout();

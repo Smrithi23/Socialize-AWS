@@ -1,17 +1,32 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
+import backgroundImage from '../../campus.jpg';
 import "./authentication.css";
 import logo from "../../logo.svg";
 
-function Signup() {
+var apigClientFactory = require("aws-api-gateway-client").default;
+
+function Signup(props) {
   const [data, setData] = useState({
     uni: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const styles = {
+    backgroundImage: `url(${backgroundImage})`,
+    height: '100vh',
+    padding: '0',
+    margin: '0',
+    imageRendering: 'crisp-edges',
+    imageRendering: 'auto',
+    backgroundSize: 'cover', 
+    backgroundPosition: 'center',
+    opacity: '1',
+  };
 
+  const [showBanner, setShowBanner] = useState(false);
   const handleChange = (event) => {
     var { name, value } = event.target;
     name = event.target.id;
@@ -20,24 +35,66 @@ function Signup() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (data.password !== data.confirmPassword) {
+    const isColumbiaEmail = data.email.endsWith("@columbia.edu");
+    if (isColumbiaEmail === false) {
+      alert(
+        "Please provide your columbia email id that ends with @columbia.edu"
+      );
+    } else if (data.password !== data.confirmPassword) {
       alert("Password and cofirm password does not match");
     } else {
-      console.log(data);
+      var apigClient = apigClientFactory.newClient({ invokeUrl: props.url });
+      var pathTemplate = "/auth/signup";
+      var pathParams = {};
+      var method = "POST";
+      var body = {};
+      var additionalParams = {
+        headers: {
+          uni: data.uni,
+          emailid: data.email,
+          password: data.password,
+        },
+        queryParams: {},
+      };
+      apigClient
+        .invokeApi(pathParams, pathTemplate, method, additionalParams, body)
+        .then(function (result) {
+          var response = JSON.parse(result.data.body);
+
+          localStorage.setItem("uni", data.uni);
+          localStorage.setItem("email", data.email);
+          setShowBanner(true);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     }
   };
-
+  const AlertComponenet = () => {
+    if (showBanner)
+      return (
+        <div className="alert alert-success" role="alert">
+          {" "}
+          Please check your email for verification{" "}
+        </div>
+      );
+    else return <></>;
+  };
   return (
     <>
       <div className="row">
         <div
           className="col-8 login-image-container"
-          style={{ padding: 0 }}
+          style={styles}
         ></div>
+
         <div className="col-4 d-flex align-items-center justify-content-center">
           <form onSubmit={handleSubmit}>
             <div className="row">
-              <img className="logo" src={logo} />
+              <img className="logo" src={logo} alt="columbia" />
+            </div>
+            <div className="row">
+              <div className="col-8 offset-2">{AlertComponenet()}</div>
             </div>
             <div className="row">
               <div className="form-group">
@@ -53,6 +110,7 @@ function Signup() {
               </div>
             </div>
             <br />
+
             <div className="row">
               <div className="form-group">
                 <label htmlFor="email">Email:</label>

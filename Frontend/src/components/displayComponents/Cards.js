@@ -5,12 +5,6 @@ export const Cards = (props) => {
   var num = props.numPeople ? props.numPeople : 0;
   return (
     <div className="card col-3">
-      {/*<img
-        src={props.img_url}
-        className="card-img-top mx-auto"
-        alt="card logo"
-        style={{ width: "50%" }}
-  />*/}
       <div className="card-body text-center">
         <h5 className="card-title">{props.title}</h5>
         <div className="card-text">
@@ -46,12 +40,6 @@ export const PollingCards = (props) => {
   var num = props.numPeople ? props.numPeople : 0;
   return (
     <div className="card col-3">
-      <img
-        src={props.img_url}
-        className="card-img-top mx-auto"
-        alt="card logo"
-        style={{ width: "50%" }}
-      />
       <div className="card-body text-center">
         <h5 className="card-title">{props.title}</h5>
         <div className="card-text" style={{ textAlign: "center" }}>
@@ -63,7 +51,7 @@ export const PollingCards = (props) => {
         </div>
         <a
           href={
-            "/specificPolling?id=" + props.pollingId + "&type=" + props.type
+            "/pollSpecific?id=" + props.pollingId + "&type=" + props.type
           }
           className="btn btn-outline-dark"
         >

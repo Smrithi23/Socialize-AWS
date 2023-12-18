@@ -11,27 +11,24 @@ HOST = 'search-socialize-2fti2w65mbul2p7of77x4y7awm.us-east-1.es.amazonaws.com'
 INDEX = 'socialize'
 
 def lambda_handler(event, context):
-
-    print(event)
-    
     activity_id = event['activity_id']
     user_id = event['user_id']
     
-    message, success, category = add_attendee_details(activity_id, user_id)
+    message, success, category, title = add_attendee_details(activity_id, user_id)
     
     if success == 0:
+        
         return {
             'statusCode': 200,
             'body': json.dumps(message)
         }
         
-    
     add_meetup_id_to_user(activity_id, user_id, category)
-    
     return {
         'statusCode': 200,
         'body': json.dumps(message)
     }
+   
 
 
 def add_attendee_details(activity_id, user_id):
@@ -45,17 +42,15 @@ def add_attendee_details(activity_id, user_id):
             KeyConditionExpression=Key('activity_id').eq(activity_id)
         )
         
-        print(QueryItem)
         attendees = QueryItem['Items'][0]['attendees']
         title = QueryItem['Items'][0]['title']
         timestamp = QueryItem['Items'][0]['timestamp']
         category = QueryItem['Items'][0]['category']
-        print("current_attendees", attendees)
     
         if user_id in attendees:
             msg = "You are already registered for " + title
             success = 0
-            return msg, success, category
+            return msg, success, category, title
         
         attendees.append(user_id)
     
@@ -72,14 +67,12 @@ def add_attendee_details(activity_id, user_id):
                 ':attendees':   attendees },
             ReturnValues='UPDATED_NEW')
     
-        print(update_response.get('Attributes', {}))
-        print("added successfully to dynamodb")
+        
         success_msg = "You are successfully registered for " + title
-        return success_msg, success, category
+        return success_msg, success, category, title
     
     except ClientError as e:
-        print('Error', e.response['Error']['Message'])
-        return "Registration failed", 0
+        return "Registration failed", 0, '', ''
     
 def add_meetup_id_to_user(activity_id, user_id, category):
 
@@ -117,21 +110,15 @@ def add_meetup_id_to_user(activity_id, user_id, category):
             id=user_id,
             body=update_request
         )
-        
-        print(response)
-        print("added successfully to opensearch") 
+    
         
     else:
-
         opensearch_record = {
                     "current_meetup_ids": [],
                     "current_event_ids": [],
                     "current_study_groups": [],
                     "current_poll_ids": [],
-                    "past_meetup_ids": [],
-                    "past_event_ids": [],
-                    "past_study_groups": [],
-                    "past_poll_ids": []
+                    "created_activities": []
         }
         
         if category == 'Meetup':
@@ -140,19 +127,13 @@ def add_meetup_id_to_user(activity_id, user_id, category):
             opensearch_record["current_event_ids"].append(activity_id)
         elif category == "Study Group":
             opensearch_record["current_study_groups"].append(activity_id)
-            
-        print("opensearch_record", opensearch_record)
-        
+
         response = client.index(
             id = user_id,
             index=INDEX,
             body=opensearch_record,
             refresh=True
         )
-
-        print('\nAdding document:')
-    print(query(user_id))
-    
 
 def get_awsauth(region, service):
     cred = boto3.Session().get_credentials()
@@ -164,7 +145,6 @@ def get_awsauth(region, service):
                     
 
 def query(user_id):
-    #q = {'size': 5, 'query': {'multi_match': {'query': user_id}}}
     client = OpenSearch(hosts=[{
         'host': HOST,
         'port': 443
@@ -175,5 +155,30 @@ def query(user_id):
         connection_class=RequestsHttpConnection)
     res = client.get(index=INDEX, id = user_id)
     
-    print(res)
     return res['_source']
+
+
+def add_message_sqs(title, category, user_id):
+    sqs = boto3.client('sqs')
+    sqs_res = sqs.get_queue_url(QueueName='activityRegistration')
+    sqs_url = sqs_res['QueueUrl']
+    sqs.send_message(
+        QueueUrl=sqs_url,
+        MessageAttributes={
+            'title': {
+                'DataType': 'String',
+                'StringValue': str(title)
+            },
+            'category': {
+                'DataType': 'String',
+                'StringValue': str(category)
+            },
+            'user_id': {
+                'DataType': 'String',
+                'StringValue': str(user_id)
+            }
+        },
+        MessageBody=(
+            'Sending email details to SQS queue'
+        )
+    )

@@ -1,36 +1,24 @@
 import React, {useState, useEffect} from "react";
 import "./user.css";
-
-/*
-function fetchUserDetails() {
-  var uni = localStorage.getItem("uni");
-  var data = {
-    name: "John Doe",
-    uni: "jd1234",
-    emailid: "jd1234@columbia.edu",
-    location: "Brooklyn",
-    phoneNum: "+16461234567",
-    interests: ["Tech", "Writing"],
-  };
-  return data;
-}*/
-
+import { Link } from "react-router-dom";
 
 var apigClientFactory = require("aws-api-gateway-client").default;
-function fetchUserDetails(setData, url) {
+
+function fetchUserDetails(setData, url, setLoading) {
   var uni = localStorage.getItem("uni");
   var apigClient = apigClientFactory.newClient({ invokeUrl: url });
-  var pathTemplate = "/profile";
+  var pathTemplate = "/profile/view";
   var pathParams = {};
   var method = "GET";
   var body = { };
+  setLoading(true);
   var additionalParams = { headers: { user_id: uni }, queryParams: {} };
   apigClient
     .invokeApi(pathParams, pathTemplate, method, additionalParams, body)
     .then(function (result) {
-      console.log("submitted:", result.data.body);
-      var res = JSON.parse(result.data.body)
-      console.log(res.interest)
+      var res = result.data.body
+      console.log(result.data)
+      setLoading(false);
       setData({
         'name' : res.name, 
         'location' :res.location,
@@ -43,12 +31,25 @@ function fetchUserDetails(setData, url) {
     })
     .catch(function (error) {
       console.log("Error:", error);
+      setLoading(false);
     });
 }
 
 function User(props) {
-  console.log(props.url)
-  
+  const [loading, setLoading] = useState(false);
+
+  const LoadingComponent = () => {
+    if (loading) {
+      return (
+        <div className="spinner-border" role="status">
+          <span className="sr-only">Loading...</span>
+        </div>
+      );
+    } else {
+      return <></>;
+    }
+  };
+
   var [data, setData] = useState({
     name: "",
     uni: "",
@@ -59,13 +60,14 @@ function User(props) {
   })
 
   useEffect(() => {
-    fetchUserDetails(setData, props.url);
+    fetchUserDetails(setData, props.url, setLoading);
   }, [props.url]);
 
   return (
     <div className="">
       <br />
       <h1>Profile</h1>
+      {LoadingComponent()}
       <br />
       <div className="row detail">
         <div className="col-2"><b>Name</b> </div>
@@ -89,11 +91,11 @@ function User(props) {
       </div>
       <div className="row detail">
         <div className="col-2"> <b>Interest</b> </div>
-        <div className="col-3" id="interests">{data.interests.map((interest, index) => (
-        <button type='button' className="btn btn-outline-primary" style={{marginRight:"5px"}}key={index}>{interest}</button>
+        <div className="col-4" id="interests">{data.interests.map((interest, index) => (
+        <button type='button' className="btn btn-outline-secondary" style={{marginRight:"5px"}}key={index}>{interest}</button>
       ))}</div>
       </div>
-      <button type="button" className="btn btn-primary">Edit</button>
+      <Link to="/user/profile_edit"><button type="button" className="btn btn-primary">Edit</button></Link>
     </div>
   );
 }
