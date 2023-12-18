@@ -24,6 +24,7 @@ def lambda_handler(event, context):
         }
         
     add_meetup_id_to_user(activity_id, user_id, category)
+    add_message_sqs(title, category, user_id)
     return {
         'statusCode': 200,
         'body': json.dumps(message)
