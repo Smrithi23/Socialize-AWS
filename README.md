@@ -6,8 +6,11 @@ The code for the frontend is kept in the "Frontend/" folder. We have a separate 
 The link to that repository is : https://github.com/12dash/Socialize
 
 ## Backend
-The Backend code is stored in the "Backend/" folder which stores the lambda functions and the api gateway yaml file. 
+The Backend code is stored in the "Backend/" folder which stores the lambda functions.
 The lambda functions are further segregated based on their functionality such as all the polls related lambda functions are stored in the folder called "LambdaFunctions/polls/" inside the "LambdaFunctions/"
+
+## API Gateway
+The api gateway file connects the backend to the frontend. Its stored in the root directory [API Gateway](socialize-apigateway.yml)
 
 ## Website hosted
 You can access the website at the following link : https://main.d3ux64n7l5a7it.amplifyapp.com/

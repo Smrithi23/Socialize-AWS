@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  version: "2023-12-17T18:23:38Z"
+  version: "2023-12-18T06:28:04Z"
   title: "socialize-api"
 host: "n8rffxphe1.execute-api.us-east-1.amazonaws.com"
 basePath: "/dev"
@@ -1112,7 +1112,7 @@ paths:
             responseParameters:
               method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,\
-                \ user_id'"
+                \ uni'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
