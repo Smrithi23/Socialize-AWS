@@ -12,5 +12,11 @@ The lambda functions are further segregated based on their functionality such as
 ## API Gateway
 The api gateway file connects the backend to the frontend. Its stored in the root directory [API Gateway](socialize-apigateway.yml)
 
+## Dataset used for AWS Personalize
+https://www.kaggle.com/datasets/stkbailey/nashville-meetup
+
+## Youtube
+https://youtu.be/eIfONzTqbVs
+
 ## Website hosted
 You can access the website at the following link : https://main.d3ux64n7l5a7it.amplifyapp.com/
